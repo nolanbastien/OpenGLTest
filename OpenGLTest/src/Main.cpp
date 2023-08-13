@@ -164,9 +164,12 @@ int main(void)
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
 
     // GET AND COMPILE SHADERS
-
     ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
     unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
+
+    ShaderProgramSource source2 = ParseShader("res/shaders/2ndTriangleShader.shader");
+    unsigned int shader2 = CreateShader(source2.VertexSource, source2.FragmentSource);
+
     glUseProgram(shader);
 
     /* Loop until the user closes the window */
@@ -179,9 +182,11 @@ int main(void)
         // Rendering commands here
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
+        glUseProgram(shader);
 
         glBindVertexArray(VAO2);
         glDrawArrays(GL_TRIANGLES, 0, 6);
+        glUseProgram(shader2);
 
         // Swap Buffers
         glfwSwapBuffers(window); // As soon as the rendering commands are finished, the front and back buffers are swapped.
