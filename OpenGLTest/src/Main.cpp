@@ -115,16 +115,18 @@ int main(void)
     std::cout << glGetString(GL_VERSION) << std::endl;
 
     // DATA
-    float positions[] = {
+    float positions1[] = {
         // First triangle
         -0.5f, -0.5f, //Left, bottom
          0.5f, -0.5f, // Right, bottom
-         0.5f,  0.5f, // Right, top
+         0.5f,  0.5f // Right, top
+    };
 
+    float positions2[] = {
         // Second triangle
-        // -0.5, -0.5, //Left, bottom
-        -0.5,  0.5 //Left, top
-        //  0.5,  0.5  //Right, top
+        -0.6f, -0.5f, //Left, bottom
+        -0.6f,  0.5f, //Left, top
+         0.4f,  0.5f  //Right, top
     };
 
     unsigned int indices[] = {
@@ -132,25 +134,31 @@ int main(void)
         2,3,0
     };
 
-    // TRIANGLE / SQUARE
-    unsigned int buffer;
-    glGenBuffers(1, &buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    // Put data in GL_ARRAY_BUFFER, total size of information in buffer is 2 times 6 float for 2 coord 
-    // for 3 points, take the floats, specify usage
-    glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW);
+    // TRIANGLE 1
+    // Create VAO
+    unsigned int VAO;
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    // Create VBO
+    unsigned int buffer1;
+    glGenBuffers(1, &buffer1);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer1);
+    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions1, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
 
-    /// INTRO TO IBO
+    // TRIANGLE 2
+    //Create VAO
+    unsigned int VAO2;
+    glGenVertexArrays(1, &VAO2);
+    glBindVertexArray(VAO2);
 
-    unsigned int ibo;
-    glGenBuffers(1, &ibo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    // Put data in GL_ARRAY_BUFFER, total size of information in buffer is 2 times 6 float for 2 coord 
-    // for 3 points, take the floats, specify usage
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+    unsigned int buffer2;
+    glGenBuffers(1, &buffer2);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer2);
+    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions2, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
@@ -169,7 +177,11 @@ int main(void)
         glClear(GL_COLOR_BUFFER_BIT);
 
         // Rendering commands here
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        glBindVertexArray(VAO2);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 
         // Swap Buffers
         glfwSwapBuffers(window); // As soon as the rendering commands are finished, the front and back buffers are swapped.
