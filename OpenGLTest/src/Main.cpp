@@ -122,9 +122,9 @@ int main(void)
          0.5f,  0.5f, // Right, top
 
         // Second triangle
-        // -0.5, -0.5, //Left, bottom
-        -0.5,  0.5 //Left, top
-        //  0.5,  0.5  //Right, top
+         -0.6, -0.5, //Left, bottom
+        -0.6,  0.5, //Left, top
+          0.4,  0.5  //Right, top
     };
 
     unsigned int indices[] = {
@@ -143,18 +143,6 @@ int main(void)
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
 
-    /// INTRO TO IBO
-
-    unsigned int ibo;
-    glGenBuffers(1, &ibo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    // Put data in GL_ARRAY_BUFFER, total size of information in buffer is 2 times 6 float for 2 coord 
-    // for 3 points, take the floats, specify usage
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
-
     // GET AND COMPILE SHADERS
 
     ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
@@ -169,7 +157,7 @@ int main(void)
         glClear(GL_COLOR_BUFFER_BIT);
 
         // Rendering commands here
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 
         // Swap Buffers
         glfwSwapBuffers(window); // As soon as the rendering commands are finished, the front and back buffers are swapped.
