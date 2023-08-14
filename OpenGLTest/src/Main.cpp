@@ -161,6 +161,13 @@ int main(void)
     unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
     glUseProgram(shader);
 
+    // UNIFORMS
+    int location = glGetUniformLocation(shader, "u_Color"); // Get location of "u_Color" we defined in shader
+
+    float r = 0.0f;
+    float increment = 0.05f;
+
+    glfwSwapInterval(1);
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -168,8 +175,17 @@ int main(void)
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+
         // Rendering commands here
+        glUniform4f(location, r, 0.3f, 0.8f, 1.0f); // Set data in shader (Remember: Uniforms are per draw, don't edit uniforms in between drawings)
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        
+        if (r > 1.0f)
+            increment = -0.05f;
+        else if (r < 0.0f)
+            increment = 0.05f;
+
+        r += increment;
 
         // Swap Buffers
         glfwSwapBuffers(window); // As soon as the rendering commands are finished, the front and back buffers are swapped.
