@@ -93,11 +93,16 @@ static unsigned int CreateShader(const std::string& vertexShader, const std::str
 
 int main(void)
 {
+    GLFWwindow* window;
+
     // Create window
     if (!glfwInit())
         return -1;
 
-    GLFWwindow* window;
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
     window = glfwCreateWindow(800, 600, "Hello World", NULL, NULL);
     if (!window)
     {
@@ -133,15 +138,20 @@ int main(void)
     };
 
     // TRIANGLE / SQUARE
+
+    unsigned int vao;
+    glGenVertexArrays(1, &vao); // generate 1 store id in vao var
+    glBindVertexArray(vao); // there's no "target" only an id (as opposed to glBindBuffer)
+
     unsigned int buffer;
-    glGenBuffers(1, &buffer);
+    glGenBuffers(1, &buffer); // Bind buffer for the vao
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
     // Put data in GL_ARRAY_BUFFER, total size of information in buffer is 2 times 6 float for 2 coord 
     // for 3 points, take the floats, specify usage
     glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0); // This binds the currently bound buffer to the VAO
 
     /// INTRO TO IBO
 
@@ -152,14 +162,10 @@ int main(void)
     // for 3 points, take the floats, specify usage
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
-
     // GET AND COMPILE SHADERS
 
     ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
     unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
-    glUseProgram(shader);
 
     // UNIFORMS
     int location = glGetUniformLocation(shader, "u_Color"); // Get location of "u_Color" we defined in shader
@@ -177,7 +183,12 @@ int main(void)
 
 
         // Rendering commands here
+        glUseProgram(shader);
         glUniform4f(location, r, 0.3f, 0.8f, 1.0f); // Set data in shader (Remember: Uniforms are per draw, don't edit uniforms in between drawings)
+
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
         
         if (r > 1.0f)
