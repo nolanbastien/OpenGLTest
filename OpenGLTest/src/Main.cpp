@@ -8,6 +8,7 @@
 
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include "VertexArray.h"
 
 struct ShaderProgramSource {
     std::string VertexSource;
@@ -142,15 +143,16 @@ int main(void)
 
     // TRIANGLE / SQUARE
 
-    unsigned int vao;
-    glGenVertexArrays(1, &vao); // generate 1 store id in vao var
-    glBindVertexArray(vao); // there's no "target" only an id (as opposed to glBindBuffer)
+    // unsigned int vao;
+    // glGenVertexArrays(1, &vao); // generate 1 store id in vao var
+    // glBindVertexArray(vao); // there's no "target" only an id (as opposed to glBindBuffer)
 
-    VertexBuffer vb(positions, 6 * 2 * sizeof(float));
-    unsigned int buffer;
+    VertexArray va;
+    VertexBuffer vb(positions, 4 * 2 * sizeof(float));
+    VertexBufferLayout layout;
+    layout.Push<float>(2);
+    va.AddBuffer(vb, layout);
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0); // This binds the currently bound buffer to the VAO
 
     /// INTRO TO IBO
 
@@ -180,7 +182,7 @@ int main(void)
         glUseProgram(shader);
         glUniform4f(location, r, 0.3f, 0.8f, 1.0f); // Set data in shader (Remember: Uniforms are per draw, don't edit uniforms in between drawings)
 
-        glBindVertexArray(vao);
+        va.Bind();
         ib.Bind();
 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
