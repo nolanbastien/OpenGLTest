@@ -6,11 +6,13 @@
 #include <string>
 #include <sstream>
 
+#include "Renderer.h"
+
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
-#include "Renderer.h"
+#include "Texture.h"
 
 void processInput(GLFWwindow* window)
 {
@@ -48,15 +50,10 @@ int main(void)
 
     // DATA
     float positions[] = {
-        // First triangle
-        -0.5f, -0.5f, //Left, bottom
-         0.5f, -0.5f, // Right, bottom
-         0.5f,  0.5f, // Right, top
-
-        // Second triangle
-        // -0.5, -0.5, //Left, bottom
-        -0.5,  0.5 //Left, top
-        //  0.5,  0.5  //Right, top
+        -0.5f, -0.5f, 0.0f, 0.0f, // 2 float for position, 2 float for texture "mapping"
+         0.5f, -0.5f, 1.0f, 0.0f,
+         0.5f,  0.5f, 1.0f, 1.0f,
+        -0.5f,  0.5f, 0.0f, 1.0f
     };
 
     unsigned int indices[] = {
@@ -64,14 +61,17 @@ int main(void)
         2,3,0
     };
 
+    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // glEnable(GL_BLEND);
+
     // TRIANGLE / SQUARE
 
     VertexArray va;
-    VertexBuffer vb(positions, 4 * 2 * sizeof(float));
+    VertexBuffer vb(positions, 4 * 4 * sizeof(float)); // 4 floats per vertex * 4 vertex
     VertexBufferLayout layout;
     layout.Push<float>(2);
+    layout.Push<float>(2);
     va.AddBuffer(vb, layout);
-
 
     /// INTRO TO IBO
 
@@ -82,6 +82,10 @@ int main(void)
     Shader shader("res/shaders/Basic.shader");
     shader.Bind();
     shader.SetUniform4f("u_Color", 0.0f, 0.3f, 0.8f, 1.0f);
+
+    Texture texture("res/textures/grass_fullres.png");
+    texture.Bind(); // Binds texture to a texture slot
+    shader.SetUniform1i("u_Texture", 0); // Gets texture from texture slot 0
 
     va.Unbind();
     shader.Unbind();
