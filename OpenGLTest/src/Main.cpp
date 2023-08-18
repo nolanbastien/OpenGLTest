@@ -10,6 +10,7 @@
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
+#include "Renderer.h"
 
 void processInput(GLFWwindow* window)
 {
@@ -87,6 +88,8 @@ int main(void)
     vb.Unbind();
     ib.Unbind();
 
+    Renderer renderer;
+
     float r = 0.0f;
     float increment = 0.05f;
 
@@ -95,18 +98,13 @@ int main(void)
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
+        
+        renderer.Clear();
 
         // Rendering commands here
         shader.Bind();
         shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f); // Set data in shader (Remember: Uniforms are per draw, don't edit uniforms in between drawings)
-
-        va.Bind();
-        ib.Bind();
-
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        renderer.Draw(va, ib, shader);
         
         if (r > 1.0f)
             increment = -0.05f;
