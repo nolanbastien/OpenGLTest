@@ -1,5 +1,4 @@
 #include "VertexArray.h"
-
 #include <GLFW\glfw3.h>
 
 VertexArray::VertexArray()
