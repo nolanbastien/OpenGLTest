@@ -82,6 +82,10 @@ int main(void)
 
     // The projection matrix takes a vertex from the specified boundaries "space" then transforms it to a -1.0 to 1.0 space for OpenGL to render.
     glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f); // This sets the boundaries of our screen. This is a 4:3 aspect ratio
+    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 0.0f));
+
+    glm::mat4 mvp = proj * view * model;
 
     Shader shader("res/shaders/Basic.shader");
     shader.Bind();
@@ -90,7 +94,7 @@ int main(void)
     Texture texture("res/textures/grass_fullres.png");
     texture.Bind(); // Binds texture to a texture slot
     shader.SetUniform1i("u_Texture", 0); // Gets texture from texture slot 0
-    shader.SetUniformMat4f("u_MVP", proj);
+    shader.SetUniformMat4f("u_MVP", mvp);
 
     va.Unbind();
     shader.Unbind();
