@@ -14,6 +14,9 @@
 #include "Shader.h"
 #include "Texture.h"
 
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+
 void processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -61,8 +64,8 @@ int main(void)
         2,3,0
     };
 
-    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     // glEnable(GL_BLEND);
+    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // TRIANGLE / SQUARE
 
@@ -77,7 +80,8 @@ int main(void)
 
     IndexBuffer ib(indices, 6);
 
-    // SHADER
+    // The projection matrix takes a vertex from the specified boundaries "space" then transforms it to a -1.0 to 1.0 space for OpenGL to render.
+    glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f); // This sets the boundaries of our screen. This is a 4:3 aspect ratio
 
     Shader shader("res/shaders/Basic.shader");
     shader.Bind();
@@ -86,6 +90,7 @@ int main(void)
     Texture texture("res/textures/grass_fullres.png");
     texture.Bind(); // Binds texture to a texture slot
     shader.SetUniform1i("u_Texture", 0); // Gets texture from texture slot 0
+    shader.SetUniformMat4f("u_MVP", proj);
 
     va.Unbind();
     shader.Unbind();
