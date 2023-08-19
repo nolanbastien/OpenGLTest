@@ -70,7 +70,7 @@ int main(void)
     // glEnable(GL_BLEND);
     // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // TRIANGLE / SQUARE
+    // Shape
 
     VertexArray va;
     VertexBuffer vb(positions, 4 * 4 * sizeof(float)); // 4 floats per vertex * 4 vertex
@@ -78,13 +78,10 @@ int main(void)
     layout.Push<float>(2);
     layout.Push<float>(2);
     va.AddBuffer(vb, layout);
-
-    /// INTRO TO IBO
-
     IndexBuffer ib(indices, 6);
 
-    // The projection matrix takes a vertex from the specified boundaries "space" then transforms it to a -1.0 to 1.0 space for OpenGL to render.
-    glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f); // This sets the boundaries of our screen. This is a 4:3 aspect ratio
+    // MVP matrices
+    glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
     glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 
     Shader shader("res/shaders/Basic.shader");
@@ -107,10 +104,6 @@ int main(void)
     ImGui::StyleColorsDark();
 
     glm::vec3 translationA(0.0f, 0.0f, 0.0f);
-    glm::vec3 translationB(0.0f, 0.0f, 0.0f);
-
-    float r = 0.0f;
-    float increment = 0.05f;
 
     glfwSwapInterval(1);
     /* Loop until the user closes the window */
@@ -131,23 +124,7 @@ int main(void)
         }
 
         {
-            glm::mat4 model = glm::translate(glm::mat4(1.0f), translationB);
-            glm::mat4 mvp = proj * view * model;
-            shader.SetUniformMat4f("u_MVP", mvp);
-
-            renderer.Draw(va, ib, shader);
-        }
-      
-        if (r > 1.0f)
-            increment = -0.05f;
-        else if (r < 0.0f)
-            increment = 0.05f;
-
-        r += increment;
-
-        {
             ImGui::SliderFloat3("Translation A", &translationA.x, -2.0f, 2.0f);
-            ImGui::SliderFloat3("Translation B", &translationB.x, -2.0f, 2.0f);
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         }
 
