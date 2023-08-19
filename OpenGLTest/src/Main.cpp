@@ -106,7 +106,8 @@ int main(void)
     ImGui_ImplGlfwGL3_Init(window, true);
     ImGui::StyleColorsDark();
 
-    glm::vec3 translation(0.0f, 0.0f, 0.0f);
+    glm::vec3 translationA(0.0f, 0.0f, 0.0f);
+    glm::vec3 translationB(0.0f, 0.0f, 0.0f);
 
     float r = 0.0f;
     float increment = 0.05f;
@@ -121,17 +122,22 @@ int main(void)
 
         ImGui_ImplGlfwGL3_NewFrame();
 
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), translation);
+        {
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), translationA);
+            glm::mat4 mvp = proj * view * model;
+            shader.SetUniformMat4f("u_MVP", mvp);
 
-        glm::mat4 mvp = proj * view * model;
+            renderer.Draw(va, ib, shader);
+        }
 
-        // Rendering commands here
-        shader.Bind();
-        shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f); // Set data in shader (Remember: Uniforms are per draw, don't edit uniforms in between drawings)
-        shader.SetUniformMat4f("u_MVP", mvp);
+        {
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), translationB);
+            glm::mat4 mvp = proj * view * model;
+            shader.SetUniformMat4f("u_MVP", mvp);
 
-        renderer.Draw(va, ib, shader);
-        
+            renderer.Draw(va, ib, shader);
+        }
+      
         if (r > 1.0f)
             increment = -0.05f;
         else if (r < 0.0f)
@@ -140,7 +146,8 @@ int main(void)
         r += increment;
 
         {
-            ImGui::SliderFloat3("Translation", &translation.x, -2.0f, 2.0f);
+            ImGui::SliderFloat3("Translation A", &translationA.x, -2.0f, 2.0f);
+            ImGui::SliderFloat3("Translation B", &translationB.x, -2.0f, 2.0f);
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         }
 
