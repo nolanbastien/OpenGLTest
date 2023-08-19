@@ -20,6 +20,8 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw_gl3.h"
 
+#include "cube.h"
+
 void processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -70,8 +72,10 @@ int main(void)
     // glEnable(GL_BLEND);
     // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // Shape
+    // SHAPES
 
+
+    // Square
     VertexArray va;
     VertexBuffer vb(positions, 4 * 4 * sizeof(float)); // 4 floats per vertex * 4 vertex
     VertexBufferLayout layout;
@@ -79,6 +83,10 @@ int main(void)
     layout.Push<float>(2);
     va.AddBuffer(vb, layout);
     IndexBuffer ib(indices, 6);
+
+    // Cube
+    Cube cube;
+
 
     // MVP matrices
     glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
@@ -121,6 +129,7 @@ int main(void)
             shader.SetUniformMat4f("u_MVP", mvp);
 
             renderer.Draw(va, ib, shader);
+            renderer.Draw(cube.va, cube.ib, shader);
         }
 
         {
