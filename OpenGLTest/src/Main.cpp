@@ -20,7 +20,7 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw_gl3.h"
 
-#include "cube.h"
+// #include "cube.h"
 
 void processInput(GLFWwindow* window)
 {
@@ -40,7 +40,7 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(800, 600, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(1600, 1200, "Hello World", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -57,36 +57,55 @@ int main(void)
     std::cout << glGetString(GL_VERSION) << std::endl;
 
     // DATA
-    float positions[] = {
-        -0.5f, -0.5f, 0.0f, 0.0f, // 2 float for position, 2 float for texture "mapping"
-         0.5f, -0.5f, 1.0f, 0.0f,
-         0.5f,  0.5f, 1.0f, 1.0f,
-        -0.5f,  0.5f, 0.0f, 1.0f
+    // init data
+
+    float data[] = {
+    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // 3 float for position, 2 float for texture "mapping"
+     0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
+    -0.5f,  0.5f, -0.5f, 0.0f, 1.0f,
+
+     0.5f, -0.5f,  0.5f, 0.0f, 0.0f, // 3 float for position, 2 float for texture "mapping"
+     0.5f,  0.5f,  0.5f, 0.0f, 1.0f,
+
+    -0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+    -0.5f,  0.5f, 0.5f, 1.0f, 1.0f
     };
 
+    // init indices
+
     unsigned int indices[] = {
-        0,1,2,
-        2,3,0
+        1,2,0,
+        2,0,3,
+
+        1,2,4,
+        2,4,5,
+
+        4,5,7,
+        4,6,7,
+
+        6,7,3,
+        6,0,3,
+
+        3,7,5,
+        3,2,5,
+
+        0,1,4,
+        0,6,4
     };
+
 
     // glEnable(GL_BLEND);
     // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // SHAPES
-
-
-    // Square
+    // CUBE
     VertexArray va;
-    VertexBuffer vb(positions, 4 * 4 * sizeof(float)); // 4 floats per vertex * 4 vertex
+    VertexBuffer vb(data, 5 * 8 * sizeof(float)); // 5 floats per vertex * 8 vertex
     VertexBufferLayout layout;
-    layout.Push<float>(2);
+    layout.Push<float>(3);
     layout.Push<float>(2);
     va.AddBuffer(vb, layout);
-    IndexBuffer ib(indices, 6);
-
-    // Cube
-    Cube cube;
-
+    IndexBuffer ib(indices, 3 * 2 * 6); // 3 vertices * 2 triangles * 2 sides
 
     // MVP matrices
     glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
@@ -112,8 +131,12 @@ int main(void)
     ImGui::StyleColorsDark();
 
     glm::vec3 translationA(0.0f, 0.0f, 0.0f);
+    float rotation_y = 0.0f;
+    float rotation_x = 0.0f;
+    glEnable(GL_DEPTH_TEST);
 
     glfwSwapInterval(1);
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -125,18 +148,23 @@ int main(void)
 
         {
             glm::mat4 model = glm::translate(glm::mat4(1.0f), translationA);
+            model = glm::rotate(model, glm::radians(rotation_y), glm::vec3(0,1,0)); // where x, y, z is axis of rotation (e.g. 0 1 0)
+            model = glm::rotate(model, glm::radians(rotation_x), glm::vec3(1,0,0)); // where x, y, z is axis of rotation (e.g. 0 1 0)
             glm::mat4 mvp = proj * view * model;
             shader.SetUniformMat4f("u_MVP", mvp);
 
             renderer.Draw(va, ib, shader);
-            renderer.Draw(cube.va, cube.ib, shader);
+            // renderer.Draw(cube.va, cube.ib, shader);
         }
 
         {
             ImGui::SliderFloat3("Translation A", &translationA.x, -2.0f, 2.0f);
+            ImGui::SliderFloat("Rotation Y", &rotation_y, 0, 360);
+            ImGui::SliderFloat("Rotation X", &rotation_x, 0, 360);
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         }
-
+        if (rotation_y > 360.0f) rotation_y = 0.0f;
+        rotation_y++;
         ImGui::Render();
         ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
 

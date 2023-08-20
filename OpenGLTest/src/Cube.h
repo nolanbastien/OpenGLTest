@@ -1,3 +1,4 @@
+/*
 #pragma once
 
 #include "VertexArray.h"
@@ -12,3 +13,4 @@ public:
 	VertexArray va;
 	IndexBuffer ib;
 };
+*/
