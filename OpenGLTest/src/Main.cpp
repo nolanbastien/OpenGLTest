@@ -40,7 +40,10 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(1600, 1200, "Hello World", NULL, NULL);
+    int width = 800;
+    int heigth = 600;
+
+    window = glfwCreateWindow(width, heigth, "Hello World", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -108,7 +111,8 @@ int main(void)
     IndexBuffer ib(indices, 3 * 2 * 6); // 3 vertices * 2 triangles * 2 sides
 
     // MVP matrices
-    glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
+    // glm::mat4 proj = glm::(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
+    glm::mat4 proj = glm::perspective(glm::radians(45.0f), (float) width / (float) heigth, 0.1f, 100.0f);
     glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 
     Shader shader("res/shaders/Basic.shader");
@@ -130,7 +134,7 @@ int main(void)
     ImGui_ImplGlfwGL3_Init(window, true);
     ImGui::StyleColorsDark();
 
-    glm::vec3 translationA(0.0f, 0.0f, 0.0f);
+    glm::vec3 translationA(0.0f, 0.0f, -5.0f);
     float rotation_y = 0.0f;
     float rotation_x = 0.0f;
     glEnable(GL_DEPTH_TEST);
@@ -158,7 +162,7 @@ int main(void)
         }
 
         {
-            ImGui::SliderFloat3("Translation A", &translationA.x, -2.0f, 2.0f);
+            ImGui::SliderFloat3("Translation A", &translationA.x, -5.0f, 5.0f);
             ImGui::SliderFloat("Rotation Y", &rotation_y, 0, 360);
             ImGui::SliderFloat("Rotation X", &rotation_x, 0, 360);
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
