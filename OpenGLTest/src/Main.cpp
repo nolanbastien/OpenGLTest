@@ -19,8 +19,7 @@
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw_gl3.h"
-
-// #include "cube.h"
+#include "Cube.h"
 
 void processInput(GLFWwindow* window)
 {
@@ -59,74 +58,22 @@ int main(void)
     // Print version
     std::cout << glGetString(GL_VERSION) << std::endl;
 
-    // DATA
-    // init data
-
-    float data[] = {
-    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // 3 float for position, 2 float for texture "mapping"
-     0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f, 0.0f, 1.0f,
-
-     0.5f, -0.5f,  0.5f, 0.0f, 0.0f, // 3 float for position, 2 float for texture "mapping"
-     0.5f,  0.5f,  0.5f, 0.0f, 1.0f,
-
-    -0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-    -0.5f,  0.5f, 0.5f, 1.0f, 1.0f
-    };
-
-    // init indices
-
-    unsigned int indices[] = {
-        1,2,0,
-        2,0,3,
-
-        1,2,4,
-        2,4,5,
-
-        4,5,7,
-        4,6,7,
-
-        6,7,3,
-        6,0,3,
-
-        3,7,5,
-        3,2,5,
-
-        0,1,4,
-        0,6,4
-    };
-
-
     // glEnable(GL_BLEND);
     // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // CUBE
-    VertexArray va;
-    VertexBuffer vb(data, 5 * 8 * sizeof(float)); // 5 floats per vertex * 8 vertex
-    VertexBufferLayout layout;
-    layout.Push<float>(3);
-    layout.Push<float>(2);
-    va.AddBuffer(vb, layout);
-    IndexBuffer ib(indices, 3 * 2 * 6); // 3 vertices * 2 triangles * 2 sides
+    Cube cube;
 
     // MVP matrices
     // glm::mat4 proj = glm::(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
     glm::mat4 proj = glm::perspective(glm::radians(45.0f), (float) width / (float) heigth, 0.1f, 100.0f);
-    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.0f));
 
     Shader shader("res/shaders/Basic.shader");
-    shader.Bind();
-    shader.SetUniform4f("u_Color", 0.0f, 0.3f, 0.8f, 1.0f);
 
     Texture texture("res/textures/grass_fullres.png");
     texture.Bind(); // Binds texture to a texture slot
     shader.SetUniform1i("u_Texture", 0); // Gets texture from texture slot 0
-
-    va.Unbind();
-    shader.Unbind();
-    vb.Unbind();
-    ib.Unbind();
 
     Renderer renderer;
 
@@ -151,18 +98,18 @@ int main(void)
         ImGui_ImplGlfwGL3_NewFrame();
 
         {
-            glm::mat4 model = glm::translate(glm::mat4(1.0f), translationA);
+            glm::mat4 model = cube.model;
             model = glm::rotate(model, glm::radians(rotation_y), glm::vec3(0,1,0)); // where x, y, z is axis of rotation (e.g. 0 1 0)
             model = glm::rotate(model, glm::radians(rotation_x), glm::vec3(1,0,0)); // where x, y, z is axis of rotation (e.g. 0 1 0)
             glm::mat4 mvp = proj * view * model;
             shader.SetUniformMat4f("u_MVP", mvp);
 
-            renderer.Draw(va, ib, shader);
-            // renderer.Draw(cube.va, cube.ib, shader);
+            renderer.Draw(cube.va, cube.ib, shader);
         }
 
         {
-            ImGui::SliderFloat3("Translation A", &translationA.x, -5.0f, 5.0f);
+            ImGui::SliderFloat3("Translation A", &cube.position.x, -5.0f, 5.0f);
+            cube.UpdateModel();
             ImGui::SliderFloat("Rotation Y", &rotation_y, 0, 360);
             ImGui::SliderFloat("Rotation X", &rotation_x, 0, 360);
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
