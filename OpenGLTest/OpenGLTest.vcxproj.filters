@@ -60,6 +60,9 @@
     <ClCompile Include="src\Cube.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\TextureCube.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\IndexBuffer.h">
@@ -956,6 +959,9 @@
     <ClInclude Include="src\Cube.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\TextureCube.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\Basic.shader" />
@@ -1375,7 +1381,10 @@
     <Image Include="..\..\..\Users\Desktop\Desktop\grass_fullres.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\textures\grass_fullres.png">
+    <Image Include="res\textures\grass_top.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\textures\grass_bottom.jpg">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

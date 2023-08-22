@@ -20,6 +20,7 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw_gl3.h"
 #include "Cube.h"
+#include "TextureCube.h"
 
 void processInput(GLFWwindow* window)
 {
@@ -71,7 +72,16 @@ int main(void)
 
     Shader shader("res/shaders/Basic.shader");
 
-    Texture texture("res/textures/grass_fullres.png");
+    const std::vector<std::string> texture_paths = {
+        "res/textures/grass.png", // Right
+        "res/textures/grass.png", // Left
+        "res/textures/grass_top.jpg", // Top
+        "res/textures/grass_bottom.jpg", // Bottom
+        "res/textures/grass.png", // Back
+        "res/textures/grass.png" // Front
+    };
+
+    TextureCube texture(texture_paths);
     texture.Bind(); // Binds texture to a texture slot
     shader.SetUniform1i("u_Texture", 0); // Gets texture from texture slot 0
 

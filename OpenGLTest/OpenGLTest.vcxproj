@@ -139,6 +139,7 @@
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\Cube.cpp" />
     <ClCompile Include="src\Texture.cpp" />
+    <ClCompile Include="src\TextureCube.cpp" />
     <ClCompile Include="src\vendor\glm\detail\glm.cpp" />
     <ClCompile Include="src\vendor\imgui\imgui.cpp" />
     <ClCompile Include="src\vendor\imgui\imgui_demo.cpp" />
@@ -155,6 +156,7 @@
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\Cube.h" />
     <ClInclude Include="src\Texture.h" />
+    <ClInclude Include="src\TextureCube.h" />
     <ClInclude Include="src\vendor\glm\common.hpp" />
     <ClInclude Include="src\vendor\glm\detail\compute_common.hpp" />
     <ClInclude Include="src\vendor\glm\detail\compute_vector_relational.hpp" />
@@ -591,7 +593,8 @@
   <ItemGroup>
     <Image Include="..\..\..\Users\Desktop\Desktop\grass_fullres.png" />
     <Image Include="res\textures\grass.png" />
-    <Image Include="res\textures\grass_fullres.png" />
+    <Image Include="res\textures\grass_top.jpg" />
+    <Image Include="res\textures\grass_bottom.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
