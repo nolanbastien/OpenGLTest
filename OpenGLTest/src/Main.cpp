@@ -21,11 +21,27 @@
 #include "imgui/imgui_impl_glfw_gl3.h"
 #include "Cube.h"
 #include "TextureCube.h"
+#include "Camera.h"
 
-void processInput(GLFWwindow* window)
+void processInput(GLFWwindow* window, Camera& cam, float deltaTime)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
+    const float cameraSpeed = 2.5f * deltaTime; // adjust accordingly
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        cam.pos += cameraSpeed * cam.front;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        cam.pos -= cameraSpeed * cam.front;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        cam.pos -= glm::normalize(glm::cross(cam.front, cam.up)) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        cam.pos += glm::normalize(glm::cross(cam.front, cam.up)) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        cam.pos += cam.up * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+        cam.pos -= cam.up * cameraSpeed;
+    
 }
 
 int main(void)
@@ -65,10 +81,14 @@ int main(void)
     // CUBE
     Cube cube;
 
+    // Camera
+
+    Camera cam;
+
     // MVP matrices
     // glm::mat4 proj = glm::(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
     glm::mat4 proj = glm::perspective(glm::radians(45.0f), (float) width / (float) heigth, 0.1f, 100.0f);
-    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.0f));
+    // glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.0f));
 
     Shader shader("res/shaders/Basic.shader");
 
@@ -98,10 +118,18 @@ int main(void)
 
     glfwSwapInterval(1);
 
+    float deltaTime = 0.0f;
+    float lastFrame = 0.0f;
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
-        processInput(window);
+        // Keep track of time
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
+        processInput(window, cam, deltaTime);
         
         renderer.Clear();
 
@@ -111,7 +139,7 @@ int main(void)
             glm::mat4 model = cube.model;
             model = glm::rotate(model, glm::radians(rotation_y), glm::vec3(0,1,0)); // where x, y, z is axis of rotation (e.g. 0 1 0)
             model = glm::rotate(model, glm::radians(rotation_x), glm::vec3(1,0,0)); // where x, y, z is axis of rotation (e.g. 0 1 0)
-            glm::mat4 mvp = proj * view * model;
+            glm::mat4 mvp = proj * cam.view * model;
             shader.SetUniformMat4f("u_MVP", mvp);
 
             renderer.Draw(cube.va, cube.ib, shader);
@@ -120,12 +148,13 @@ int main(void)
         {
             ImGui::SliderFloat3("Translation A", &cube.position.x, -5.0f, 5.0f);
             cube.UpdateModel();
+            ImGui::SliderFloat3("Translation B", &cam.pos.x, -5.0f, 5.0f);
+            cam.UpdateView();
             ImGui::SliderFloat("Rotation Y", &rotation_y, 0, 360);
             ImGui::SliderFloat("Rotation X", &rotation_x, 0, 360);
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         }
-        if (rotation_y > 360.0f) rotation_y = 0.0f;
-        rotation_y++;
+
         ImGui::Render();
         ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
 
