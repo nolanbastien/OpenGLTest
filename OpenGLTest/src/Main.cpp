@@ -23,10 +23,49 @@
 #include "TextureCube.h"
 #include "Camera.h"
 
+float lastX = 400, lastY = 300;
+bool firstMouse = true;
+Camera cam;
+float yaw = -90.0f;
+float pitch = 0.0f;
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
+    lastX = xpos;
+    lastY = ypos;
+
+    float sensitivity = 0.05f;
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    yaw += xoffset;
+    pitch += yoffset;
+
+    if (pitch > 89.0f)
+        pitch = 89.0f;
+    if (pitch < -89.0f)
+        pitch = -89.0f;
+
+    glm::vec3 direction;
+    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    direction.y = sin(glm::radians(pitch));
+    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cam.front = glm::normalize(direction);
+}
+
 void processInput(GLFWwindow* window, Camera& cam, float deltaTime)
 {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
+    //if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    //    glfwSetWindowShouldClose(window, true);
 
     const float cameraSpeed = 2.5f * deltaTime; // adjust accordingly
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
@@ -41,8 +80,12 @@ void processInput(GLFWwindow* window, Camera& cam, float deltaTime)
         cam.pos += cam.up * cameraSpeed;
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
         cam.pos -= cam.up * cameraSpeed;
+
+    glfwSetCursorPosCallback(window, mouse_callback);
     
 }
+
+
 
 int main(void)
 {
@@ -81,10 +124,6 @@ int main(void)
     // CUBE
     Cube cube;
 
-    // Camera
-
-    Camera cam;
-
     // MVP matrices
     // glm::mat4 proj = glm::(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
     glm::mat4 proj = glm::perspective(glm::radians(45.0f), (float) width / (float) heigth, 0.1f, 100.0f);
@@ -120,6 +159,8 @@ int main(void)
 
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;
+
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
