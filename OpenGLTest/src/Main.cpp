@@ -64,8 +64,8 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
 void processInput(GLFWwindow* window, Camera& cam, float deltaTime)
 {
-    //if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-    //    glfwSetWindowShouldClose(window, true);
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
 
     const float cameraSpeed = 2.5f * deltaTime; // adjust accordingly
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
@@ -99,8 +99,8 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    int width = 800;
-    int heigth = 600;
+    int width = 1600;
+    int heigth = 1200;
 
     window = glfwCreateWindow(width, heigth, "Hello World", NULL, NULL);
     if (!window)
@@ -125,7 +125,7 @@ int main(void)
     Cube cube;
 
     // MVP matrices
-    // glm::mat4 proj = glm::(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
+    // glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
     glm::mat4 proj = glm::perspective(glm::radians(45.0f), (float) width / (float) heigth, 0.1f, 100.0f);
     // glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.0f));
 
@@ -140,9 +140,20 @@ int main(void)
         "res/textures/grass.png" // Front
     };
 
+    const std::vector<std::string> texture_paths_skybox = {
+        "res/textures/skybox/right.jpg", // Right
+        "res/textures/skybox/left.jpg", // Left
+        "res/textures/skybox/top.jpg", // Top
+        "res/textures/skybox/bottom.jpg", // Bottom
+        "res/textures/skybox/front.jpg", // Front
+        "res/textures/skybox/back.jpg", // Back
+    };
+
     TextureCube texture(texture_paths);
     texture.Bind(); // Binds texture to a texture slot
-    shader.SetUniform1i("u_Texture", 0); // Gets texture from texture slot 0
+    
+    TextureCube texture_skybox(texture_paths_skybox);
+    texture_skybox.Bind(1); // Binds texture to a texture slot
 
     Renderer renderer;
 
@@ -162,6 +173,8 @@ int main(void)
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -171,18 +184,31 @@ int main(void)
         lastFrame = currentFrame;
 
         processInput(window, cam, deltaTime);
+
+        // if (cam.pos.y < 2.0f) cam.pos.y = 2.0f;
         
         renderer.Clear();
 
         ImGui_ImplGlfwGL3_NewFrame();
 
-        {
+        { // skybox
+            glm::mat4 model = cube.model;
+            model = glm::scale(model, glm::vec3(100.0f, 100.0f, 100.0f));
+            glm::mat4 view = glm::mat4(glm::mat3(cam.view)); // Trick to remove the translation operation on view. This allows the skybox to stay centered.
+            glm::mat4 mvp = proj * view * model;
+            shader.SetUniformMat4f("u_MVP", mvp);
+            shader.SetUniform1i("u_Texture", 1); // Gets texture from texture slot 0
+            renderer.Draw(cube.va, cube.ib, shader);
+        }
+
+        { // cube
             glm::mat4 model = cube.model;
             model = glm::rotate(model, glm::radians(rotation_y), glm::vec3(0,1,0)); // where x, y, z is axis of rotation (e.g. 0 1 0)
             model = glm::rotate(model, glm::radians(rotation_x), glm::vec3(1,0,0)); // where x, y, z is axis of rotation (e.g. 0 1 0)
             glm::mat4 mvp = proj * cam.view * model;
             shader.SetUniformMat4f("u_MVP", mvp);
-
+            texture.Bind(); // Binds texture to a texture slot
+            shader.SetUniform1i("u_Texture", 0); // Gets texture from texture slot 0
             renderer.Draw(cube.va, cube.ib, shader);
         }
 
