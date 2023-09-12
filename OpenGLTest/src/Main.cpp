@@ -123,6 +123,21 @@ int main(void)
 
     // CUBE
     Cube cube;
+    cube.position = glm::vec3(1.0f, 0.0f, 1.0f);
+    std::vector<Cube*> cube_array;
+
+
+
+    for (float i = 0.0f; i < 3.0f; i = i + 1.0f)
+    {
+        for (float j = 0.0f; j < 3.0f; j = j + 1.0f)
+        { 
+            Cube* c = new Cube();
+            c->position = glm::vec3(i, -1.0f, j);
+            c->UpdateModel();
+            cube_array.push_back(c);
+        }
+    }
 
     // MVP matrices
     // glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
@@ -166,6 +181,10 @@ int main(void)
     float rotation_x = 0.0f;
     glEnable(GL_DEPTH_TEST);
 
+    // glEnable(GL_CULL_FACE);
+    // glCullFace(GL_BACK);
+    // glFrontFace(GL_CW);
+
     glfwSwapInterval(1);
 
     float deltaTime = 0.0f;
@@ -185,7 +204,7 @@ int main(void)
 
         processInput(window, cam, deltaTime);
 
-        // if (cam.pos.y < 2.0f) cam.pos.y = 2.0f;
+        // if (cam.pos.y < 1.5f) cam.pos.y = 1.5f;
         
         renderer.Clear();
 
@@ -210,6 +229,16 @@ int main(void)
             texture.Bind(); // Binds texture to a texture slot
             shader.SetUniform1i("u_Texture", 0); // Gets texture from texture slot 0
             renderer.Draw(cube.va, cube.ib, shader);
+        }
+
+        for (Cube *c : cube_array)
+        {
+            glm::mat4 model = c->model;
+            glm::mat4 mvp = proj * cam.view * model;
+            shader.SetUniformMat4f("u_MVP", mvp);
+            texture.Bind(); // Binds texture to a texture slot
+            shader.SetUniform1i("u_Texture", 0); // Gets texture from texture slot 0
+            renderer.Draw(c->va, c->ib, shader);
         }
 
         {
