@@ -13,8 +13,10 @@ J'ai décidé de transformer ce projet en clone de minecraft. C'est pourquoi j'a
 
 ### À implémenter:
 
-- Système pour render les blocks par "chunk"
-- Système pour détruire et construire des blocks
+- Rendering qui s'assure de ne pas render les formes hors du champ de vision
+- Système pour render les blocks par "chunk" de 64x64x64
+- Système pour détruire et construire des blocs
+- Système de lumière
 
 ### Screenshot:
 
