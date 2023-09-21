@@ -2,7 +2,7 @@
 
 J'ai écrit ce code en lisant le livre _learn opengl graphics programming_ (https://learnopengl.com/book/book_pdf.pdf) et en suivant les tutoriels OpenGL de la chaîne youtube The Cherno dans le but de me familiariser avec des concepts de programmation graphique.
 
-J'ai décidé de transformé ce projet en clone de minecraft. C'est pourquoi j'ai inclus un système pour se déplacer dans le monde et pourquoi je _render_ des blocks. D'autres features s'en viennent.
+J'ai décidé de transformer ce projet en clone de minecraft. C'est pourquoi j'ai inclus un système pour se déplacer dans le monde et pourquoi je _render_ des blocs. D'autres features s'en viennent.
 
 ### Le projet inclut:
 
