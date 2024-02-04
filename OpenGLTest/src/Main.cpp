@@ -17,11 +17,10 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_glfw_gl3.h"
 #include "Cube.h"
 #include "TextureCube.h"
 #include "Camera.h"
+#include "SkyBox.h"
 
 float lastX = 400, lastY = 300;
 bool firstMouse = true;
@@ -126,7 +125,9 @@ int main(void)
     cube.position = glm::vec3(1.0f, 0.0f, 1.0f);
     std::vector<Cube*> cube_array;
 
-
+    // Skybox
+    SkyBox skybox;
+    skybox.position = glm::vec3(0.0f, 0.0f, 0.0f);
 
     for (float i = 0.0f; i < 3.0f; i = i + 1.0f)
     {
@@ -172,18 +173,17 @@ int main(void)
 
     Renderer renderer;
 
-    ImGui::CreateContext();
-    ImGui_ImplGlfwGL3_Init(window, true);
-    ImGui::StyleColorsDark();
-
     glm::vec3 translationA(0.0f, 0.0f, -5.0f);
     float rotation_y = 0.0f;
     float rotation_x = 0.0f;
-    glEnable(GL_DEPTH_TEST);
 
-    // glEnable(GL_CULL_FACE);
-    // glCullFace(GL_BACK);
-    // glFrontFace(GL_CW);
+    // Suposedly ensures that we don't render things behind other things
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
+
+
+    glEnable(GL_CULL_FACE);
 
     glfwSwapInterval(1);
 
@@ -208,18 +208,16 @@ int main(void)
         
         renderer.Clear();
 
-        ImGui_ImplGlfwGL3_NewFrame();
-
         { // skybox
-            glm::mat4 model = cube.model;
+            glm::mat4 model = skybox.model;
             model = glm::scale(model, glm::vec3(100.0f, 100.0f, 100.0f));
             glm::mat4 view = glm::mat4(glm::mat3(cam.view)); // Trick to remove the translation operation on view. This allows the skybox to stay centered.
             glm::mat4 mvp = proj * view * model;
             shader.SetUniformMat4f("u_MVP", mvp);
             shader.SetUniform1i("u_Texture", 1); // Gets texture from texture slot 0
-            renderer.Draw(cube.va, cube.ib, shader);
+            renderer.Draw(skybox.va, skybox.ib, shader);
         }
-
+  
         { // cube
             glm::mat4 model = cube.model;
             model = glm::rotate(model, glm::radians(rotation_y), glm::vec3(0,1,0)); // where x, y, z is axis of rotation (e.g. 0 1 0)
@@ -241,26 +239,14 @@ int main(void)
             renderer.Draw(c->va, c->ib, shader);
         }
 
-        {
-            ImGui::SliderFloat3("Translation A", &cube.position.x, -5.0f, 5.0f);
-            cube.UpdateModel();
-            ImGui::SliderFloat3("Translation B", &cam.pos.x, -5.0f, 5.0f);
-            cam.UpdateView();
-            ImGui::SliderFloat("Rotation Y", &rotation_y, 0, 360);
-            ImGui::SliderFloat("Rotation X", &rotation_x, 0, 360);
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-        }
-
-        ImGui::Render();
-        ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
+        cube.UpdateModel();
+        cam.UpdateView();
 
         // Swap Buffers
         glfwSwapBuffers(window); // As soon as the rendering commands are finished, the front and back buffers are swapped.
 
         glfwPollEvents(); // Checks if any events are triggered (like keyboard or mouse mouvement).
     }
-    ImGui_ImplGlfwGL3_Shutdown();
-    ImGui::DestroyContext();
     glfwTerminate();
     return 0;
 }
