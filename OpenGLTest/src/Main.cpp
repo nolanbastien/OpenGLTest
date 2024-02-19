@@ -6,21 +6,23 @@
 #include <string>
 #include <sstream>
 
-#include "Renderer.h"
+#include "rendering/Renderer.h"
 
-#include "VertexBuffer.h"
-#include "IndexBuffer.h"
-#include "VertexArray.h"
-#include "Shader.h"
-#include "Texture.h"
+#include "rendering/VertexBuffer.h"
+#include "rendering/IndexBuffer.h"
+#include "rendering/VertexArray.h"
+#include "rendering/Shader.h"
+#include "rendering/Texture.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
-#include "Cube.h"
-#include "TextureCube.h"
-#include "Camera.h"
-#include "SkyBox.h"
+#include "rendering/Cube.h"
+#include "rendering/TextureCube.h"
+#include "rendering/Camera.h"
+#include "rendering/SkyBox.h"
+
+#include "Game/World.h"
 
 float lastX = 400, lastY = 300;
 bool firstMouse = true;
@@ -61,12 +63,21 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     cam.front = glm::normalize(direction);
 }
 
-void processInput(GLFWwindow* window, Camera& cam, float deltaTime)
+// void processCollision(World world, Camera& cam, float cameraSpeed) {
+// 
+//     glm::vec3 move = world.PlayerTouchedCube(cam.pos.x, cam.pos.y, cam.pos.z);
+//     
+//     cam.pos += move * cameraSpeed;
+// }
+
+void processInput(GLFWwindow* window, Camera& cam, float deltaTime, World world)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
     const float cameraSpeed = 2.5f * deltaTime; // adjust accordingly
+    const glm::vec3 previousCamPos = cam.pos;
+
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         cam.pos += cameraSpeed * cam.front;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -80,11 +91,29 @@ void processInput(GLFWwindow* window, Camera& cam, float deltaTime)
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
         cam.pos -= cam.up * cameraSpeed;
 
+    const int hasCollided = world.PlayerTouchedCube(cam.pos.x, cam.pos.y, cam.pos.z);
+    switch (hasCollided) {
+        case 0:
+            break;
+        case 1:
+            // Hit in the x direction
+            cam.pos.x = previousCamPos.x;
+            break;
+        case 2:
+            // Hit in the y direction
+            cam.pos.y = previousCamPos.y;
+            break;
+        case 3:
+            // Hit in the x direction
+            cam.pos.z = previousCamPos.z;
+            break;
+    }
+
+    // processCollision(world, cam, cameraSpeed);
+
     glfwSetCursorPosCallback(window, mouse_callback);
     
 }
-
-
 
 int main(void)
 {
@@ -121,24 +150,13 @@ int main(void)
     // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // CUBE
-    Cube cube;
-    cube.position = glm::vec3(1.0f, 0.0f, 1.0f);
     std::vector<Cube*> cube_array;
 
     // Skybox
     SkyBox skybox;
     skybox.position = glm::vec3(0.0f, 0.0f, 0.0f);
 
-    for (float i = 0.0f; i < 3.0f; i = i + 1.0f)
-    {
-        for (float j = 0.0f; j < 3.0f; j = j + 1.0f)
-        { 
-            Cube* c = new Cube();
-            c->position = glm::vec3(i, -1.0f, j);
-            c->UpdateModel();
-            cube_array.push_back(c);
-        }
-    }
+    World world;
 
     // MVP matrices
     // glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
@@ -181,8 +199,6 @@ int main(void)
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
 
-
-
     glEnable(GL_CULL_FACE);
 
     glfwSwapInterval(1);
@@ -202,7 +218,7 @@ int main(void)
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        processInput(window, cam, deltaTime);
+        processInput(window, cam, deltaTime, world);
 
         // if (cam.pos.y < 1.5f) cam.pos.y = 1.5f;
         
@@ -218,28 +234,20 @@ int main(void)
             renderer.Draw(skybox.va, skybox.ib, shader);
         }
   
-        { // cube
-            glm::mat4 model = cube.model;
-            model = glm::rotate(model, glm::radians(rotation_y), glm::vec3(0,1,0)); // where x, y, z is axis of rotation (e.g. 0 1 0)
-            model = glm::rotate(model, glm::radians(rotation_x), glm::vec3(1,0,0)); // where x, y, z is axis of rotation (e.g. 0 1 0)
-            glm::mat4 mvp = proj * cam.view * model;
-            shader.SetUniformMat4f("u_MVP", mvp);
-            texture.Bind(); // Binds texture to a texture slot
-            shader.SetUniform1i("u_Texture", 0); // Gets texture from texture slot 0
-            renderer.Draw(cube.va, cube.ib, shader);
-        }
+        // { // cube
+        //     glm::mat4 model = cube.model;
+        //     model = glm::rotate(model, glm::radians(rotation_y), glm::vec3(0,1,0)); // where x, y, z is axis of rotation (e.g. 0 1 0)
+        //     model = glm::rotate(model, glm::radians(rotation_x), glm::vec3(1,0,0)); // where x, y, z is axis of rotation (e.g. 0 1 0)
+        //     glm::mat4 mvp = proj * cam.view * model;
+        //     shader.SetUniformMat4f("u_MVP", mvp);
+        //     texture.Bind(); // Binds texture to a texture slot
+        //     shader.SetUniform1i("u_Texture", 0); // Gets texture from texture slot 0
+        //     renderer.Draw(cube.va, cube.ib, shader);
+        // }
 
-        for (Cube *c : cube_array)
-        {
-            glm::mat4 model = c->model;
-            glm::mat4 mvp = proj * cam.view * model;
-            shader.SetUniformMat4f("u_MVP", mvp);
-            texture.Bind(); // Binds texture to a texture slot
-            shader.SetUniform1i("u_Texture", 0); // Gets texture from texture slot 0
-            renderer.Draw(c->va, c->ib, shader);
-        }
+        world.Draw(cam, shader, renderer, texture, proj);
 
-        cube.UpdateModel();
+        // cube.UpdateModel();
         cam.UpdateView();
 
         // Swap Buffers
