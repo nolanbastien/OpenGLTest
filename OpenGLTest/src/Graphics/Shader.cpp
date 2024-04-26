@@ -8,6 +8,12 @@
 #include <string>
 #include <sstream>
 
+Shader::Shader()
+    : m_RendererID(0)
+{
+    // You will have to set filepath later tho.
+}
+
 Shader::Shader(const std::string & filepath)
 	: m_FilePath(filepath), m_RendererID(0) // m_FilePath is only used for debugging. Otherwise, we use filepath
 {
@@ -18,6 +24,12 @@ Shader::Shader(const std::string & filepath)
 Shader::~Shader()
 {
     glDeleteProgram(m_RendererID);
+}
+
+void Shader::SetPath(const std::string & filepath) {
+    m_FilePath = filepath;
+	ShaderProgramSource source = ParseShader(filepath);
+	m_RendererID = CreateShader(source.VertexSource, source.FragmentSource);
 }
 
 ShaderProgramSource Shader::ParseShader(const std::string& filepath)
@@ -31,6 +43,10 @@ ShaderProgramSource Shader::ParseShader(const std::string& filepath)
     std::string line;
     std::stringstream ss[2];
     ShaderType type = ShaderType::NONE;
+
+    if (stream.fail()) {
+        std::cout << "Couldn't open file.";
+    }
 
     while (getline(stream, line))
     {
