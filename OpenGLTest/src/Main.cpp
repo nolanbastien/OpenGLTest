@@ -17,10 +17,10 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
-#include "rendering/Cube.h"
+#include "Game/Cube.h"
+#include "Game/SkyBox.h"
 #include "rendering/TextureCube.h"
 #include "rendering/Camera.h"
-#include "rendering/SkyBox.h"
 
 #include "Game/World.h"
 
@@ -150,11 +150,12 @@ int main(void)
     // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // CUBE
+    Cube cube;
     std::vector<Cube*> cube_array;
 
     // Skybox
     SkyBox skybox;
-    skybox.position = glm::vec3(0.0f, 0.0f, 0.0f);
+    skybox.m_Position = glm::vec3(0.0f, 0.0f, 0.0f);
 
     World world;
 
@@ -165,15 +166,6 @@ int main(void)
 
     Shader shader("res/shaders/Basic.shader");
 
-    const std::vector<std::string> texture_paths = {
-        "res/textures/grass.png", // Right
-        "res/textures/grass.png", // Left
-        "res/textures/grass_top.jpg", // Top
-        "res/textures/grass_bottom.jpg", // Bottom
-        "res/textures/grass.png", // Back
-        "res/textures/grass.png" // Front
-    };
-
     const std::vector<std::string> texture_paths_skybox = {
         "res/textures/skybox/right.jpg", // Right
         "res/textures/skybox/left.jpg", // Left
@@ -182,9 +174,6 @@ int main(void)
         "res/textures/skybox/front.jpg", // Front
         "res/textures/skybox/back.jpg", // Back
     };
-
-    TextureCube texture(texture_paths);
-    texture.Bind(); // Binds texture to a texture slot
     
     TextureCube texture_skybox(texture_paths_skybox);
     texture_skybox.Bind(1); // Binds texture to a texture slot
@@ -195,7 +184,6 @@ int main(void)
     float rotation_y = 0.0f;
     float rotation_x = 0.0f;
 
-    // Suposedly ensures that we don't render things behind other things
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
 
@@ -220,8 +208,6 @@ int main(void)
 
         processInput(window, cam, deltaTime, world);
 
-        // if (cam.pos.y < 1.5f) cam.pos.y = 1.5f;
-        
         renderer.Clear();
 
         { // skybox
@@ -233,21 +219,20 @@ int main(void)
             shader.SetUniform1i("u_Texture", 1); // Gets texture from texture slot 0
             renderer.Draw(skybox.va, skybox.ib, shader);
         }
-  
-        // { // cube
-        //     glm::mat4 model = cube.model;
-        //     model = glm::rotate(model, glm::radians(rotation_y), glm::vec3(0,1,0)); // where x, y, z is axis of rotation (e.g. 0 1 0)
-        //     model = glm::rotate(model, glm::radians(rotation_x), glm::vec3(1,0,0)); // where x, y, z is axis of rotation (e.g. 0 1 0)
-        //     glm::mat4 mvp = proj * cam.view * model;
-        //     shader.SetUniformMat4f("u_MVP", mvp);
-        //     texture.Bind(); // Binds texture to a texture slot
-        //     shader.SetUniform1i("u_Texture", 0); // Gets texture from texture slot 0
-        //     renderer.Draw(cube.va, cube.ib, shader);
-        // }
 
-        world.Draw(cam, shader, renderer, texture, proj);
+        { // cube
+            glm::mat4 model = cube.model;
+            model = glm::rotate(model, glm::radians(rotation_y), glm::vec3(0,1,0)); // where x, y, z is axis of rotation (e.g. 0 1 0)
+            model = glm::rotate(model, glm::radians(rotation_x), glm::vec3(1,0,0)); // where x, y, z is axis of rotation (e.g. 0 1 0)
+            glm::mat4 mvp = proj * cam.view * model;
+            shader.SetUniformMat4f("u_MVP", mvp);
+            cube.m_TextureCube.Bind(); // Binds texture to a texture slot
+            shader.SetUniform1i("u_Texture", 0); // Gets texture from texture slot 0
+            renderer.Draw(cube.va, cube.ib, shader);
+        }
 
-        // cube.UpdateModel();
+        world.Draw(cam, shader, renderer, proj);
+
         cam.UpdateView();
 
         // Swap Buffers

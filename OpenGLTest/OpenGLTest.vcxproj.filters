@@ -57,7 +57,7 @@
     <ClCompile Include="src\vendor\imgui\imgui_impl_glfw_gl3.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\rendering\Cube.cpp">
+    <ClCompile Include="src\Game\Cube.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\rendering\TextureCube.cpp">
@@ -66,10 +66,13 @@
     <ClCompile Include="src\rendering\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\rendering\SkyBox.cpp">
+    <ClCompile Include="src\Game\SkyBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Game\World.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Game\ShinyCube.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -965,7 +968,7 @@
     <ClInclude Include="src\vendor\imgui\stb_truetype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\rendering\Cube.h">
+    <ClInclude Include="src\Game\Cube.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\rendering\TextureCube.h">
@@ -974,10 +977,13 @@
     <ClInclude Include="src\rendering\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\rendering\SkyBox.h">
+    <ClInclude Include="src\Game\SkyBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Game\World.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Game\ShinyCube.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,7 +1,7 @@
 #pragma once
 
+#include "Cube.h"
 #include "../rendering/Camera.h"
-#include "../rendering/Cube.h"
 #include "../rendering/TextureCube.h"
 
 class World
@@ -11,6 +11,6 @@ public:
 
 	World();
 	int PlayerTouchedCube(float x, float y, float z);
-	void Draw(Camera& cam, Shader& shader, Renderer& renderer, TextureCube& texture, glm::mat4& proj);
+	void Draw(Camera& cam, Shader& shader, Renderer& renderer, glm::mat4& proj);
 };
 
