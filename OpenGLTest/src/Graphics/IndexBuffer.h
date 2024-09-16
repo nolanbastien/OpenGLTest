@@ -8,6 +8,7 @@ private:
 	unsigned int m_Count; // number of indices
 
 public:
+	IndexBuffer();
 	IndexBuffer(const unsigned int* size, unsigned int count);
 	~IndexBuffer();
 
